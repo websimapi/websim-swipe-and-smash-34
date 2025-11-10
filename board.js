@@ -82,17 +82,17 @@ export default class Board {
                     candy.style.top = `${-candySize}px`;
                     candy.style.left = `${col * candySize}px`;
                     break;
-                case 90: // From left
+                case 90: // From right (Green mode)
                     candy.style.top = `${row * candySize}px`;
-                    candy.style.left = `${-candySize}px`;
+                    candy.style.left = `${this.size * candySize}px`;
                     break;
                 case 180: // From bottom
                     candy.style.top = `${this.size * candySize}px`;
                     candy.style.left = `${col * candySize}px`;
                     break;
-                case 270: // From right
+                case 270: // From left (Yellow mode)
                     candy.style.top = `${row * candySize}px`;
-                    candy.style.left = `${this.size * candySize}px`;
+                    candy.style.left = `${-candySize}px`;
                     break;
             }
         }
@@ -384,10 +384,10 @@ export default class Board {
                     }
                 }
             }
-        } else if (this.rotation === 90) { // Gravity Right
+        } else if (this.rotation === 90) { // Gravity Left (Green mode)
             for (let r = 0; r < this.size; r++) {
-                let emptyCol = this.size - 1;
-                for (let c = this.size - 1; c >= 0; c--) {
+                let emptyCol = 0;
+                for (let c = 0; c < this.size; c++) {
                     if (this.grid[r][c]) {
                         if (emptyCol !== c) {
                             this.grid[r][emptyCol] = this.grid[r][c];
@@ -395,7 +395,7 @@ export default class Board {
                             this.grid[r][emptyCol].dataset.col = emptyCol;
                             this.grid[r][emptyCol].style.left = `${emptyCol * candySize}px`;
                         }
-                        emptyCol--;
+                        emptyCol++;
                     }
                 }
             }
@@ -414,10 +414,10 @@ export default class Board {
                     }
                 }
             }
-        } else if (this.rotation === 270) { // Gravity Left
+        } else if (this.rotation === 270) { // Gravity Right (Yellow mode)
             for (let r = 0; r < this.size; r++) {
-                let emptyCol = 0;
-                for (let c = 0; c < this.size; c++) {
+                let emptyCol = this.size - 1;
+                for (let c = this.size - 1; c >= 0; c--) {
                     if (this.grid[r][c]) {
                         if (emptyCol !== c) {
                             this.grid[r][emptyCol] = this.grid[r][c];
@@ -425,7 +425,7 @@ export default class Board {
                             this.grid[r][emptyCol].dataset.col = emptyCol;
                             this.grid[r][emptyCol].style.left = `${emptyCol * candySize}px`;
                         }
-                        emptyCol++;
+                        emptyCol--;
                     }
                 }
             }

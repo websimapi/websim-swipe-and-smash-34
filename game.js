@@ -189,6 +189,7 @@ class Game {
 
         const rotation = getOrientationRotation(this.requiredOrientation);
         // this.ui.gameBoardContainer.style.transform = `rotate(${rotation}deg)`; // No longer rotating container
+        this.board.setRotation(rotation);
         
         // Rotate each candy individually so it appears facing the new "up"
         this.board.boardElement.querySelectorAll('.candy').forEach(candy => {

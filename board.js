@@ -10,6 +10,7 @@ export default class Board {
         this.onMatch = onMatch;
         this.getNewCandyType = getNewCandyType;
         this.getIsPaused = getIsPaused;
+        this.rotation = 0;
     }
 
     pausableTimeout(duration) {
@@ -32,6 +33,10 @@ export default class Board {
             };
             requestAnimationFrame(tick);
         });
+    }
+
+    setRotation(rotation) {
+        this.rotation = rotation;
     }
 
     initialize(initialState) {
@@ -71,9 +76,25 @@ export default class Board {
             candy.style.top = `${row * candySize}px`;
             candy.style.left = `${col * candySize}px`;
         } else {
-            // Start above the board for drop-in animation
-            candy.style.top = `${-candySize}px`;
-            candy.style.left = `${col * candySize}px`;
+            // Start candies off-screen based on rotation for drop-in animation
+            switch (this.rotation) {
+                case 0: // Default, from top
+                    candy.style.top = `${-candySize}px`;
+                    candy.style.left = `${col * candySize}px`;
+                    break;
+                case 90: // From left
+                    candy.style.top = `${row * candySize}px`;
+                    candy.style.left = `${-candySize}px`;
+                    break;
+                case 180: // From bottom
+                    candy.style.top = `${this.size * candySize}px`;
+                    candy.style.left = `${col * candySize}px`;
+                    break;
+                case 270: // From right
+                    candy.style.top = `${row * candySize}px`;
+                    candy.style.left = `${this.size * candySize}px`;
+                    break;
+            }
         }
 
         this.boardElement.appendChild(candy);
@@ -346,20 +367,66 @@ export default class Board {
     }
 
     async dropCandies() {
-        for (let c = 0; c < this.size; c++) {
-            let emptyRow = this.size - 1;
-            for (let r = this.size - 1; r >= 0; r--) {
-                if (this.grid[r][c]) {
-                    if (emptyRow !== r) {
-                        // Move candy down
-                        this.grid[emptyRow][c] = this.grid[r][c];
-                        this.grid[r][c] = null;
-                        this.grid[emptyRow][c].dataset.row = emptyRow;
-                        
-                        const candySize = this.boardElement.clientWidth / this.size;
-                        this.grid[emptyRow][c].style.top = `${emptyRow * candySize}px`;
+        const candySize = this.boardElement.clientWidth / this.size;
+
+        if (this.rotation === 0) { // Gravity Down
+            for (let c = 0; c < this.size; c++) {
+                let emptyRow = this.size - 1;
+                for (let r = this.size - 1; r >= 0; r--) {
+                    if (this.grid[r][c]) {
+                        if (emptyRow !== r) {
+                            this.grid[emptyRow][c] = this.grid[r][c];
+                            this.grid[r][c] = null;
+                            this.grid[emptyRow][c].dataset.row = emptyRow;
+                            this.grid[emptyRow][c].style.top = `${emptyRow * candySize}px`;
+                        }
+                        emptyRow--;
                     }
-                    emptyRow--;
+                }
+            }
+        } else if (this.rotation === 90) { // Gravity Right
+            for (let r = 0; r < this.size; r++) {
+                let emptyCol = this.size - 1;
+                for (let c = this.size - 1; c >= 0; c--) {
+                    if (this.grid[r][c]) {
+                        if (emptyCol !== c) {
+                            this.grid[r][emptyCol] = this.grid[r][c];
+                            this.grid[r][c] = null;
+                            this.grid[r][emptyCol].dataset.col = emptyCol;
+                            this.grid[r][emptyCol].style.left = `${emptyCol * candySize}px`;
+                        }
+                        emptyCol--;
+                    }
+                }
+            }
+        } else if (this.rotation === 180) { // Gravity Up
+            for (let c = 0; c < this.size; c++) {
+                let emptyRow = 0;
+                for (let r = 0; r < this.size; r++) {
+                    if (this.grid[r][c]) {
+                        if (emptyRow !== r) {
+                            this.grid[emptyRow][c] = this.grid[r][c];
+                            this.grid[r][c] = null;
+                            this.grid[emptyRow][c].dataset.row = emptyRow;
+                            this.grid[emptyRow][c].style.top = `${emptyRow * candySize}px`;
+                        }
+                        emptyRow++;
+                    }
+                }
+            }
+        } else if (this.rotation === 270) { // Gravity Left
+            for (let r = 0; r < this.size; r++) {
+                let emptyCol = 0;
+                for (let c = 0; c < this.size; c++) {
+                    if (this.grid[r][c]) {
+                        if (emptyCol !== c) {
+                            this.grid[r][emptyCol] = this.grid[r][c];
+                            this.grid[r][c] = null;
+                            this.grid[r][emptyCol].dataset.col = emptyCol;
+                            this.grid[r][emptyCol].style.left = `${emptyCol * candySize}px`;
+                        }
+                        emptyCol++;
+                    }
                 }
             }
         }
@@ -376,6 +443,7 @@ export default class Board {
                     // Animate the drop
                     await new Promise(resolve => requestAnimationFrame(() => {
                         candy.style.top = `${r * candySize}px`;
+                        candy.style.left = `${c * candySize}px`;
                         resolve();
                     }));
                 }
